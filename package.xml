@@ -3,9 +3,9 @@
 <package format="3">
   <name>mavlink2roboclaw</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Transform ActuatorControl messages from mavros to roboclaw input messages</description>
   <maintainer email="pierce@ladonrobotics.com">pierce</maintainer>
-  <license>TODO: License declaration</license>
+  <license>Copyright Ladon Robotics (c) 2022. All rights reserved.</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
