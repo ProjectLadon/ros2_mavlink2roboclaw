@@ -32,6 +32,7 @@ namespace mav2robo
         uint8_t             mOutputChannel;
         float               mMixGain;
         int32_t             mOutGain;
+        int32_t             mOutOffset;
 
         // subscriber
         rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr  mActSub;
