@@ -11,7 +11,6 @@
 
 #include "roboclaw/msg/motor_velocity_single.hpp"
 #include "roboclaw/msg/motor_duty_single.hpp"
-#include "roboclaw/msg/motor_position_single.hpp"
 #include "mavros_msgs/msg/actuator_control.hpp"
 
 using namespace std::chrono_literals;
@@ -22,26 +21,39 @@ namespace mav2robo
     class Mav2RoboDiff : public rclcpp::Node
     {
     public:
-        Mav2RoboSingle(string name);
+        Mav2RoboDiff(string name);
     private:
         // parameter variables
         RoboclawCmdType     mCmdType;
         uint8_t             mInputMixGroup;
-        uint8_t             mInputCtrlChannel;
-        uint8_t             mOutputIndex;
-        uint8_t             mOutputChannel;
-        float               mMixGain;
-        int32_t             mOutGain;
-        int32_t             mOutOffset;
+        uint8_t             mInputThrottleChannel;
+        uint8_t             mInputSteeringChannel;
+        uint8_t             mLeftOutputIndex;
+        uint8_t             mLeftOutputChannel;
+        uint8_t             mRightOutputIndex;
+        uint8_t             mRightOutputChannel;
+        float               mSteeringGain;
+        float               mThrottleGain;
+        float               mSteeringOffset;
+        float               mThrottleOffset;
+        int32_t             mLeftOutGain;
+        int32_t             mRightOutGain;
+        int32_t             mLeftOutOffset;
+        int32_t             mRightOutOffset;
 
         // subscriber
         rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr  mActSub;
 
         // publishers
-        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingle>::SharedPtr    mVelPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mDutyPub;
+        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingle>::SharedPtr    mLeftVelPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mLeftDutyPub;
+        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingle>::SharedPtr    mRightVelPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mRightDutyPub;
 
         // callback
         void act_cb(const mavros_msgs::msg::ActuatorControl &msg);
-    }
+
+        // publisher selector
+        void pub(float left, float right);
+    };
 }

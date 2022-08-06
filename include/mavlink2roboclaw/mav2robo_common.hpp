@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 
 namespace mav2robo
 {
@@ -15,6 +16,13 @@ namespace mav2robo
     {
         std::transform(data.begin(), data.end(), data.begin(),
             [](unsigned char c){ return std::tolower(c); });
+    }
+
+    inline float fbound(float val, float upper, float lower)
+    {
+        float max_val = fmax(upper, lower);
+        float min_val = fmin(upper, lower);
+        return (fmax(min_val, fmin(val, max_val)));
     }
 
 }

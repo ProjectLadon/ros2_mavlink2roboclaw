@@ -28,7 +28,7 @@ namespace mav2robo
         if (tmp == "position") { mCmdType = mav2robo::RoboclawCmdType::Position; }
         else if (tmp == "velocity") { mCmdType = mav2robo::RoboclawCmdType::Velocity; }
         else if (tmp == "duty") { mCmdType = mav2robo::RoboclawCmdType::Duty; }
-        else { throw std::runtime_error("command_type must be either \"position\", \"velocity\",  or \"duty\""); }
+        else { throw std::runtime_error("command_type must be either \"position\", \"velocity\", or \"duty\""); }
         std::string sub, pub;
         this->get_parameter("input_mix_group", mInputMixGroup);
         this->get_parameter("input_ctrl_chan", mInputCtrlChannel);
@@ -40,20 +40,20 @@ namespace mav2robo
 
         // create subscriber
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
-            "~\act_cmd", 10, bind(&Mav2RoboSingle::act_cb, this, _1));
+            "~/act_cmd", 10, bind(&Mav2RoboSingle::act_cb, this, _1));
 
         // create publisher
         switch(mCmdType)
         {
             case mav2robo::RoboclawCmdType::Velocity:
-                mVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingle>("~/roboclaw_cmd", 10);
+                mVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingle>("~/vel_cmd", 10);
                 break;
             case mav2robo::RoboclawCmdType::Duty:
-                mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/roboclaw_cmd", 10);
+                mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/duty_cmd", 10);
                 break;
             case mav2robo::RoboclawCmdType::Position:
             default:
-                mPosnPub = this->create_publisher<roboclaw::msg::MotorPositionSingle>("~/roboclaw_cmd", 10);
+                mPosnPub = this->create_publisher<roboclaw::msg::MotorPositionSingle>("~/posn_cmd", 10);
                 break;
         }
     }
