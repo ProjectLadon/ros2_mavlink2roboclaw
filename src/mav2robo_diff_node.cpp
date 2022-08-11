@@ -15,21 +15,21 @@ namespace mav2robo
     {
         // declare params
         this->declare_parameter<std::string>("command_type",        "duty");
-        this->declare_parameter<uint8_t>("input/mix_group",         0);
-        this->declare_parameter<uint8_t>("input/throttle/channel",  0);
-        this->declare_parameter<uint8_t>("input/steering/channel",  1);
-        this->declare_parameter<float>("mix/steering/gain",         1.0f);
-        this->declare_parameter<float>("mix/steering/offset",       0.0f);
-        this->declare_parameter<float>("mix/throttle/gain",         1.0f);
-        this->declare_parameter<float>("mix/throttle/offset",       0.0f);
-        this->declare_parameter<uint8_t>("output/left/index",       0);
-        this->declare_parameter<uint8_t>("output/left/channel",     1);
-        this->declare_parameter<uint8_t>("output/right/index",      0);
-        this->declare_parameter<uint8_t>("output/right/channel",    2);
-        this->declare_parameter<int32_t>("output/left/gain",        1024);
-        this->declare_parameter<int32_t>("output/left/offset",      0);
-        this->declare_parameter<int32_t>("output/right/gain",       1024);
-        this->declare_parameter<int32_t>("output/right/offset",     0);
+        this->declare_parameter<uint8_t>("input.mix_group",         0);
+        this->declare_parameter<uint8_t>("input.throttle.channel",  0);
+        this->declare_parameter<uint8_t>("input.steering.channel",  1);
+        this->declare_parameter<float>("mix.steering.gain",         1.0f);
+        this->declare_parameter<float>("mix.steering.offset",       0.0f);
+        this->declare_parameter<float>("mix.throttle.gain",         1.0f);
+        this->declare_parameter<float>("mix.throttle.offset",       0.0f);
+        this->declare_parameter<uint8_t>("output.left.index",       0);
+        this->declare_parameter<uint8_t>("output.left.channel",     1);
+        this->declare_parameter<uint8_t>("output.right.index",      0);
+        this->declare_parameter<uint8_t>("output.right.channel",    2);
+        this->declare_parameter<int32_t>("output.left.gain",        1024);
+        this->declare_parameter<int32_t>("output.left.offset",      0);
+        this->declare_parameter<int32_t>("output.right.gain",       1024);
+        this->declare_parameter<int32_t>("output.right.offset",     0);
 
         // fetch params
         std::string tmp;
@@ -39,21 +39,21 @@ namespace mav2robo
         else if (tmp == "duty") { mCmdType = mav2robo::RoboclawCmdType::Duty; }
         else { throw std::runtime_error("command_type must be either \"velocity\" or \"duty\""); }
         std::string sub, pub;
-        this->get_parameter("input/mix_group",          mInputMixGroup);
-        this->get_parameter("input/throttle/channel",   mInputThrottleChannel);
-        this->get_parameter("input/steering/channel",   mInputSteeringChannel);
-        this->get_parameter("mix/steering/gain",        mSteeringGain);
-        this->get_parameter("mix/steering/offset",      mThrottleGain);
-        this->get_parameter("mix/throttle/gain",        mSteeringOffset);
-        this->get_parameter("mix/throttle/offset",      mThrottleOffset);
-        this->get_parameter("output/left/index",        mLeftOutputIndex);
-        this->get_parameter("output/left/channel",      mLeftOutputChannel);
-        this->get_parameter("output/right/index",       mRightOutputIndex);
-        this->get_parameter("output/right/channel",     mRightOutputChannel);
-        this->get_parameter("output/left/gain",         mLeftOutGain);
-        this->get_parameter("output/left/offset",       mRightOutGain);
-        this->get_parameter("output/right/gain",        mLeftOutOffset);
-        this->get_parameter("output/right/offset",      mRightOutOffset);
+        this->get_parameter("input.mix_group",          mInputMixGroup);
+        this->get_parameter("input.throttle.channel",   mInputThrottleChannel);
+        this->get_parameter("input.steering.channel",   mInputSteeringChannel);
+        this->get_parameter("mix.steering.gain",        mSteeringGain);
+        this->get_parameter("mix.steering.offset",      mThrottleGain);
+        this->get_parameter("mix.throttle.gain",        mSteeringOffset);
+        this->get_parameter("mix.throttle.offset",      mThrottleOffset);
+        this->get_parameter("output.left.index",        mLeftOutputIndex);
+        this->get_parameter("output.left.channel",      mLeftOutputChannel);
+        this->get_parameter("output.right.index",       mRightOutputIndex);
+        this->get_parameter("output.right.channel",     mRightOutputChannel);
+        this->get_parameter("output.left.gain",         mLeftOutGain);
+        this->get_parameter("output.left.offset",       mRightOutGain);
+        this->get_parameter("output.right.gain",        mLeftOutOffset);
+        this->get_parameter("output.right.offset",      mRightOutOffset);
         if (mInputSteeringChannel > 7) { throw std::runtime_error("Steering input channel must be between 0 and 7, inclusive"); }
         if (mInputThrottleChannel > 7) { throw std::runtime_error("Throttle input channel must be between 0 and 7, inclusive"); }
 
