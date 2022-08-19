@@ -33,9 +33,17 @@ ament_target_dependencies(mav2robo_diff_node
     "roboclaw"
     "mavros_msgs")
 
+add_executable(mav2robo_switch_node
+    src/mav2robo_diff_node.cpp)
+ament_target_dependencies(mav2robo_switch_node
+    "rclcpp"
+    "roboclaw"
+    "mavros_msgs")
+
 install(TARGETS
     mav2robo_single_node
     mav2robo_diff_node
+    mav2robo_switch_node
     DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
