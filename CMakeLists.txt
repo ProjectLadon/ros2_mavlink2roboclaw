@@ -54,6 +54,7 @@ install(TARGETS
     mav2robo_single_node
     mav2robo_diff_node
     mav2robo_switch_node
+    mav2robo_aux_propulsion_node
     DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
