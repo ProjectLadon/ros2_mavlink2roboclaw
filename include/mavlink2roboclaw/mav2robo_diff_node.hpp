@@ -12,6 +12,7 @@
 #include "roboclaw/msg/motor_velocity_single.hpp"
 #include "roboclaw/msg/motor_duty_single.hpp"
 #include "mavros_msgs/msg/actuator_control.hpp"
+#include "mavros_msgs/msg/actuator_output_status.hpp"
 
 using namespace std::chrono_literals;
 using namespace std;

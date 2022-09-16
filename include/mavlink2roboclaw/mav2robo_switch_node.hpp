@@ -11,6 +11,7 @@
 
 #include "ssp_interfaces/srv/relay_command.hpp"
 #include "mavros_msgs/msg/actuator_control.hpp"
+#include "mavros_msgs/msg/actuator_output_status.hpp"
 
 using namespace std::chrono_literals;
 using namespace std;
@@ -26,6 +27,8 @@ namespace mav2robo
     
         bool get_state();
         uint8_t get_channel() { return mOutputChannel; }
+        bool is_new_cmd() { return mNewCommand; }
+        void clear_new_cmd() { mNewCommand = false; }
 
     private:
         // parameter variables

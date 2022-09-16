@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(roboclaw REQUIRED)
 find_package(mavros_msgs REQUIRED)
+find_package(ssp_interfaces REQUIRED)
 
 # specify include directories
 include_directories(
@@ -34,11 +35,20 @@ ament_target_dependencies(mav2robo_diff_node
     "mavros_msgs")
 
 add_executable(mav2robo_switch_node
-    src/mav2robo_diff_node.cpp)
+    src/mav2robo_switch_node.cpp)
 ament_target_dependencies(mav2robo_switch_node
     "rclcpp"
     "roboclaw"
-    "mavros_msgs")
+    "mavros_msgs"
+    "ssp_interfaces")
+
+add_executable(mav2robo_aux_propulsion_node
+    src/mav2robo_aux_propulsion_node.cpp)
+ament_target_dependencies(mav2robo_aux_propulsion_node
+    "rclcpp"
+    "roboclaw"
+    "mavros_msgs"
+    "ssp_interfaces")
 
 install(TARGETS
     mav2robo_single_node

@@ -34,7 +34,7 @@ namespace mav2robo
             "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_cb, this, _1));
 
         // create client
-        mRelayClient = this->create_client<ssp_interfaces::srv::RelayCommand>::SharedPtr("~/relay_client");
+        mRelayClient = this->create_client<ssp_interfaces::srv::RelayCommand>("~/relay_client");
     }
 
     void Mav2RoboSwitch::act_cb(const mavros_msgs::msg::ActuatorControl &msg)
@@ -50,7 +50,7 @@ namespace mav2robo
     {
         if (mInputValue > mThreshold)
         {
-            return (!mOutputInvert)
+            return (!mOutputInvert);
         }
         return mOutputInvert;
     }
@@ -63,27 +63,25 @@ int main(int argc, char **argv)
     auto node = std::make_shared<mav2robo::Mav2RoboSwitch>("mav2roboclaw_switch");
     while (rclcpp::ok())
     {
-        rclcpp::spin_once(node);
-        if (mNewCommand and node->mRelayClient->wait_for_services(100ms))
+        rclcpp::spin_some(node);
+        if (node->is_new_cmd() and node->mRelayClient->wait_for_service(100ms))
         {
-            mNewCommand = false;
-            uint8_t channel = node->get_channel();
-            bool state = node->get_state();
-            RCLCPP_INFO(node->get_logger(), "Writing relay command %d to relay  %d", state, channel);
+            RCLCPP_INFO(node->get_logger(), "Writing relay command %d to relay  %d", 
+                node->get_state(), node->get_channel());
             auto request = std::make_shared<ssp_interfaces::srv::RelayCommand::Request>();
-            request->channel = channel;
-            request->state = state;
+            request->channel = node->get_channel();
+            request->state = node->get_state();
             auto result = node->mRelayClient->async_send_request(request);
-            if ((rclcpp::spin_until_future_complete(node, results) 
+            if ((rclcpp::spin_until_future_complete(node, result) 
                 == rclcpp::FutureReturnCode::SUCCESS)
                 and (result.get()->state == request->state))
             {
-                RCLCPP_INFO(node->get_logger(), "Successfully set relay %d to state %d", channel, state);
+                node->clear_new_cmd();
+                RCLCPP_INFO(node->get_logger(), "Successfully set relay %d to state %d", request->channel, request->state);
             }
             else
             {
-                RCLCPP_INFO(node->get_logger(), "Failed to set relay %d to state %d", channel, state);
-                mNewCommand = true; // try again later
+                RCLCPP_INFO(node->get_logger(), "Failed to set relay %d to state %d", request->channel, request->state);
             }
         }
     }
