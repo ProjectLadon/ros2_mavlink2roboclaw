@@ -45,13 +45,13 @@ namespace mav2robo
             bind(&Mav2RoboAuxProp::motor_current_cb, this, _1));
         
         // create publishers
-        mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right_aux_propulsion", sensor_qos);
-        mLeftMotorPub       = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left_aux_propulsion", sensor_qos);
-        mRightRetractPub    = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right_retract", sensor_qos);    
-        mLeftRetractPub     = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left_retract", sensor_qos);
+        mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/propulsion", sensor_qos);
+        mLeftMotorPub       = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/propulsion", sensor_qos);
+        mRightRetractPub    = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/retract", sensor_qos);    
+        mLeftRetractPub     = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/retract", sensor_qos);
 
         // create client
-        mHornClient         = this->create_client<ssp_interfaces::srv::RelayCommand>("~/horn_client");
+        mHornClient         = this->create_client<ssp_interfaces::srv::RelayCommand>("~/horn");
 
         // create timer callback 
         mStateTimer         = this->create_wall_timer(mStepTimeMillis, 

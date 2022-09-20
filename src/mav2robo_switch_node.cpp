@@ -20,7 +20,6 @@ namespace mav2robo
         this->declare_parameter<bool>("output_invert", false);
 
         // fetch params
-        std::string sub, pub;
         this->get_parameter("input_mix_group", mInputMixGroup);
         this->get_parameter("input_ctrl_chan", mInputCtrlChannel);
         this->get_parameter("output_channel", mOutputChannel);
