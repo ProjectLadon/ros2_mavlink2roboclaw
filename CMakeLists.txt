@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(roboclaw REQUIRED)
 find_package(mavros_msgs REQUIRED)
 find_package(ssp_interfaces REQUIRED)
+find_package(rcl_interfaces REQUIRED)
 
 # specify include directories
 include_directories(
@@ -18,6 +19,7 @@ include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
     ${ssp_interfaces_INCLUDE_DIRS}
+    ${rcl_interfaces_INCLUDE_DIRS}
 )
 
 add_executable(mav2robo_single_node
@@ -56,6 +58,7 @@ ament_target_dependencies(mav2robo_aux_propulsion_node
     "rclcpp"
     "roboclaw"
     "mavros_msgs"
+    "rcl_interfaces"
     "ssp_interfaces")
 
 install(TARGETS

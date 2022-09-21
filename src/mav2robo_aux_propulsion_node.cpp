@@ -4,7 +4,9 @@
 
 #include "mavlink2roboclaw/mav2robo_common.hpp"
 #include "mavlink2roboclaw/mav2robo_aux_propulsion_node.hpp"
+#include "rcl_interfaces/msg/parameter_event.hpp"
 #include <functional>
+#include <memory>
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
@@ -33,16 +35,17 @@ namespace mav2robo
         mRetractRightComplete   = false;
 
         // create subscribers
-        auto sensor_qos = rclcpp::SensorDataQoS();
-        mActCtrlSub     = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
+        auto sensor_qos     = rclcpp::SensorDataQoS();
+        mActCtrlSub         = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
             "~/actuator_control", sensor_qos, 
             bind(&Mav2RoboAuxProp::act_ctrl_cb, this, _1));
-        mActOutStatSub  = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
+        mActOutStatSub      = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
             "~/actuator_output_status", sensor_qos, 
             bind(&Mav2RoboAuxProp::act_out_stat_cb, this, _1));
-        mMotorCurrentSub  = this->create_subscription<roboclaw::msg::MotorVoltsAmps>(
+        mMotorCurrentSub    = this->create_subscription<roboclaw::msg::MotorVoltsAmps>(
             "~/retract_current", sensor_qos, 
             bind(&Mav2RoboAuxProp::motor_current_cb, this, _1));
+        mParamSub           = std::make_shared<rclcpp::ParameterEventHandler>(this);
         
         // create publishers
         mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/propulsion", sensor_qos);
@@ -331,16 +334,30 @@ namespace mav2robo
 
     void Mav2RoboAuxProp::declare_params()
     {
-        this->declare_parameter<int8_t>("throttle.mix_group",               0);
-        this->declare_parameter<int8_t>("steering.mix_group",               0);
-        this->declare_parameter<int8_t>("retract.cmd.mix_group",            0);
-        this->declare_parameter<uint8_t>("throttle.channel",                0);
-        this->declare_parameter<uint8_t>("steering.channel",                0);
-        this->declare_parameter<uint8_t>("retract.cmd.channel",             0);
-        this->declare_parameter<float>("retract.cmd.extend_threshold",      0.1);
-        this->declare_parameter<float>("retract.cmd.retract_threshold",     -0.1);
 
-        // propulsion mix & output parameter variables
+        // create callback lambda
+        auto cb = [this](const rcl_interfaces::msg::ParameterEvent &e) 
+        { 
+            if (e.node == string(this->get_fully_qualified_name()))
+            {
+                RCLCPP_INFO(this->get_logger(), "Received ParameterEvent for this node; re-fetching parameters");
+                fetch_params();
+            }
+        };
+        mParamCBHandle = mParamSub->add_parameter_event_callback(cb);
+        // auto cb = [this](const rclcpp::Parameter &p) { fetch_params(); }
+
+        // input parameters
+        this->declare_parameter<int8_t>("throttle.mix_group", 0);
+        this->declare_parameter<int8_t>("steering.mix_group", 0);
+        this->declare_parameter<int8_t>("retract.cmd.mix_group",            0);
+        this->declare_parameter<uint8_t>("throttle.channel", 0);
+        this->declare_parameter<uint8_t>("steering.channel", 0);
+        this->declare_parameter<uint8_t>("retract.cmd.channel", 0);
+        this->declare_parameter<float>("retract.cmd.extend_threshold", 0.1);
+        this->declare_parameter<float>("retract.cmd.retract_threshold", -0.1);
+
+        // propulsion mix & output parameters
         this->declare_parameter<uint8_t>("propulsion.left.index", 0);
         this->declare_parameter<uint8_t>("propulsion.left.channel", 1);
         this->declare_parameter<uint8_t>("propulsion.right.index", 0);
@@ -354,7 +371,7 @@ namespace mav2robo
         this->declare_parameter<float>("propulsion.right.gain", 1.0);
         this->declare_parameter<float>("propulsion.right.offset", 0.0);
 
-        // extend/retract output parameter variables
+        // extend/retract output parameters 
         this->declare_parameter<uint8_t>("retract.left.index", 0);
         this->declare_parameter<uint8_t>("retract.left.channel", 1);
         this->declare_parameter<uint8_t>("retract.right.index", 0);
@@ -364,7 +381,7 @@ namespace mav2robo
         this->declare_parameter<int32_t>("retract.out.neutral", 0);
         this->declare_parameter<uint8_t>("horn.channel", 0);
 
-        // state transition parameter variables
+        // state transition parameters
         this->declare_parameter<float>("horn.time.retract_start_sec", 0.0);
         this->declare_parameter<float>("horn.time.extend_start_sec", 0.0);
         this->declare_parameter<float>("horn.time.motor_start_sec", 0.0);

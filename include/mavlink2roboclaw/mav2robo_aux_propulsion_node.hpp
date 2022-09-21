@@ -5,6 +5,8 @@
 
 #include <string>
 #include <chrono>
+#include <memory>
+#include <vector>
 
 #include "mavlink2roboclaw/mav2robo_common.hpp"
 
@@ -112,6 +114,10 @@ namespace mav2robo
 
         // service client
         rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedPtr mHornClient;
+
+        // parameter update subscriber & callback
+        shared_ptr<rclcpp::ParameterEventHandler>               mParamSub;
+        rclcpp::ParameterEventCallbackHandle::SharedPtr         mParamCBHandle;
 
         // subscriptions
         rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr      mActCtrlSub;
