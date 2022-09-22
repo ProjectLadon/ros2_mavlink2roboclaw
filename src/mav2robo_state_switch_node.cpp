@@ -54,7 +54,7 @@ namespace mav2robo
         this->get_parameter("connect.inverted", mConnectedInverted);
         this->get_parameter("armed.inverted", mArmedInverted);
         this->get_parameter("guided.inverted", mGuidedInverted);
-        this->get_parameter("manual.input_inverted", mManualInputInverted);
+        this->get_parameter("manual_input.input_inverted", mManualInputInverted);
         this->get_parameter("output.and", mIsOutputAnd);
         this->get_parameter("string_mode.enabled", mStringModeEnabled);
         this->get_parameter("string_mode.inverted", mStringModeInverted);
