@@ -39,8 +39,9 @@ namespace mav2robo
         if (mInputCtrlChannel > 7) { throw std::runtime_error("Input channel must be between 0 and 7, inclusive"); }
 
         // create subscriber
+        auto sensor_qos     = rclcpp::SensorDataQoS();
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
-            "~/act_cmd", 10, bind(&Mav2RoboSingle::act_cb, this, _1));
+            "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_cb, this, _1));
 
         // create publisher
         switch(mCmdType)

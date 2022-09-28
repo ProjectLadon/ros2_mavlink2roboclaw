@@ -17,9 +17,6 @@ namespace mav2robo
 {
     Mav2RoboAuxProp::Mav2RoboAuxProp(string name) : Node (name)
     {
-        declare_params();
-        fetch_params();
-
         // initialize state variables
         mCurrState              = aux_propulsion_state_t::BEGIN;
         mLastState              = aux_propulsion_state_t::BEGIN;
@@ -34,6 +31,10 @@ namespace mav2robo
         mRetractLeftComplete    = false;
         mRetractRightComplete   = false;
 
+        mParamSub           = std::make_shared<rclcpp::ParameterEventHandler>(this);
+        declare_params();
+        fetch_params();
+
         // create subscribers
         auto sensor_qos     = rclcpp::SensorDataQoS();
         mActCtrlSub         = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
@@ -45,7 +46,6 @@ namespace mav2robo
         mMotorCurrentSub    = this->create_subscription<roboclaw::msg::MotorVoltsAmps>(
             "~/retract_current", sensor_qos, 
             bind(&Mav2RoboAuxProp::motor_current_cb, this, _1));
-        mParamSub           = std::make_shared<rclcpp::ParameterEventHandler>(this);
         
         // create publishers
         mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/propulsion", sensor_qos);
@@ -78,8 +78,8 @@ namespace mav2robo
     }
 
     void Mav2RoboAuxProp::horn_receive(
-        rclcpp::FutureReturnCode return_code, 
-        rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedFuture result
+        rclcpp::FutureReturnCode &return_code, 
+        rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedFuture &result
     )
     {
         if ((return_code == rclcpp::FutureReturnCode::SUCCESS)
@@ -336,16 +336,9 @@ namespace mav2robo
     {
 
         // create callback lambda
-        auto cb = [this](const rcl_interfaces::msg::ParameterEvent &e) 
-        { 
-            if (e.node == string(this->get_fully_qualified_name()))
-            {
-                RCLCPP_INFO(this->get_logger(), "Received ParameterEvent for this node; re-fetching parameters");
-                fetch_params();
-            }
-        };
-        mParamCBHandle = mParamSub->add_parameter_event_callback(cb);
-        // auto cb = [this](const rclcpp::Parameter &p) { fetch_params(); }
+        mParamCBHandle = mParamSub->add_parameter_event_callback(
+            [this](const rcl_interfaces::msg::ParameterEvent &e) 
+        { if (e.node == string(this->get_fully_qualified_name())) { fetch_params(); } });
 
         // input parameters
         this->declare_parameter<int8_t>("throttle.mix_group", 0);
@@ -370,6 +363,8 @@ namespace mav2robo
         this->declare_parameter<float>("propulsion.left.offset", 0.0);
         this->declare_parameter<float>("propulsion.right.gain", 1.0);
         this->declare_parameter<float>("propulsion.right.offset", 0.0);
+        this->declare_parameter<int32_t>("propulsion.max_output", 32768);
+        this->declare_parameter<int32_t>("propulsion.min_output", -32768);
 
         // extend/retract output parameters 
         this->declare_parameter<uint8_t>("retract.left.index", 0);
@@ -414,9 +409,11 @@ namespace mav2robo
         this->get_parameter("steering.input.offset",            mSteeringOffset);
         this->get_parameter("throttle.input.offset",            mThrottleOffset);
         this->get_parameter("propulsion.left.gain",             mLeftMotorGain);
-        this->get_parameter("propulsion.left.offset",           mRightMotorGain);
-        this->get_parameter("propulsion.right.gain",            mLeftMotorOffset);
+        this->get_parameter("propulsion.left.offset",           mLeftMotorOffset);
+        this->get_parameter("propulsion.right.gain",            mRightMotorGain);
         this->get_parameter("propulsion.right.offset",          mRightMotorOffset);
+        this->get_parameter("propulsion.max_output",            mMaxMotorOutput);
+        this->get_parameter("propulsion.min_output",            mMinMotorOutput);
 
         // extend/retract output parameter variables
         this->get_parameter("retract.left.index",               mLeftRetractIndex);
@@ -451,10 +448,11 @@ namespace mav2robo
 
     void Mav2RoboAuxProp::mix_motors(float throttle, float steering, bool extend, bool retract)
     {
-        mLeftMotorOutput = mLeftMotorGain * (throttle + steering + mLeftMotorOffset);
-        mRightMotorOutput = mRightMotorGain * (throttle + steering + mRightMotorOffset);
+        mLeftMotorOutput = bound_val((mLeftMotorGain * (throttle + steering + mLeftMotorOffset)), mMaxMotorOutput, mMinMotorOutput);
+        mRightMotorOutput = bound_val((mRightMotorGain * (throttle - steering + mRightMotorOffset)), mMaxMotorOutput, mMinMotorOutput);
         if (extend)
         {
+            RCLCPP_INFO(this->get_logger(), "Extending aux propulsion, output %d, completed left %d right %d", mRetractExtendOut, (int)mRetractLeftComplete, (int)mRetractRightComplete);
             mRetractLeftComplete ? mLeftRetractOutput = mRetractNeutralOut : mLeftRetractOutput = mRetractExtendOut;
             mRetractRightComplete ? mRightRetractOutput = mRetractNeutralOut : mRightRetractOutput = mRetractExtendOut;
         }
@@ -510,6 +508,8 @@ int main(int argc, char **argv)
             rclcpp::FutureReturnCode code = rclcpp::spin_until_future_complete(node, result);
             node->horn_receive(code, result);
         }
+        // This is a stupid ugly hack to keep this thread from slamming the CPU it's running on -- PN 9/26/22
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     rclcpp::shutdown();
 

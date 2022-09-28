@@ -6,6 +6,7 @@
 #include <functional>
 #include <memory>
 #include <bitset>
+#include <thread>
 
 using std::placeholders::_1;
 
@@ -71,17 +72,23 @@ namespace mav2robo
     {
         bitset<6> output_states;
         bool output = false;
-        output_states[0] = check_string_mode_triggered(msg.mode);
-        output_states[1] = check_sys_state_triggered(msg.system_status);
-        output_states[2] = mConnectedEnabled and (msg.connected xor mConnectedInverted);
-        output_states[3] = mArmedEnabled and (msg.armed xor mArmedInverted);
-        output_states[4] = mGuidedEnabled and (msg.guided xor mGuidedInverted);
-        output_states[5] = mManualInputEnabled and (msg.manual_input xor mManualInputInverted);
+        // For enabled trigger modes, this logic applies the incoming state. 
+        // Otherwise, it applies the value of mIsOutputAnd, which makes sure both OR and AND logic work correctly
+        output_states[0] = mStringModeEnabled ? (check_string_mode_triggered(msg.mode)) : mIsOutputAnd;
+        output_states[1] = mSysStatusEnabled ? (check_sys_state_triggered(msg.system_status)) : mIsOutputAnd;
+        output_states[2] = mConnectedEnabled ? (msg.connected xor mConnectedInverted) : mIsOutputAnd;
+        output_states[3] = mArmedEnabled ? (msg.armed xor mArmedInverted) : mIsOutputAnd;
+        output_states[4] = mGuidedEnabled ? (msg.guided xor mGuidedInverted) : mIsOutputAnd;
+        output_states[5] = mManualInputEnabled ? (msg.manual_input xor mManualInputInverted) : mIsOutputAnd;
         if (mIsOutputAnd) { output = output_states.all(); }
         else { output = output_states.any(); }
         output = output xor mOutputInvert;
-        if (output != mOutputState) { mNewCommandAvailable = true; }
+        if (output != mOutputState) { 
+            RCLCPP_INFO(this->get_logger(), "Received a new state %d", (int)output);
+            mNewCommandAvailable = true; 
+        }
         mOutputState = output;
+        
     }
 
     bool Mav2RoboSwitch::check_string_mode_triggered(string input)
@@ -125,6 +132,8 @@ int main(int argc, char **argv)
                 RCLCPP_INFO(node->get_logger(), "Failed to set relay %d to state %d", request->channel, request->state);
             }
         }
+        // This is a stupid ugly hack to keep this thread from slamming the CPU it's running on -- PN 9/26/22
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     rclcpp::shutdown();
 

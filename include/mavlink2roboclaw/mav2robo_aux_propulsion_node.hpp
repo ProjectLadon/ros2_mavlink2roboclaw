@@ -7,6 +7,7 @@
 #include <chrono>
 #include <memory>
 #include <vector>
+#include <algorithm>
 
 #include "mavlink2roboclaw/mav2robo_common.hpp"
 
@@ -44,7 +45,7 @@ namespace mav2robo
         
         // public methods
         bool horn_prepare(rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedFuture &result);
-        void horn_receive(rclcpp::FutureReturnCode return_code, rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedFuture result);
+        void horn_receive(rclcpp::FutureReturnCode &return_code, rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedFuture &result);
 
     private:
         // input parameter variables
@@ -70,6 +71,9 @@ namespace mav2robo
         float       mRightMotorGain;
         float       mLeftMotorOffset;
         float       mRightMotorOffset;
+        int32_t     mMaxMotorOutput;
+        int32_t     mMinMotorOutput;
+
 
         // extend/retract output parameter variables
         uint8_t                     mLeftRetractIndex;
@@ -154,6 +158,7 @@ namespace mav2robo
         void fetch_params();
         void mix_motors(float throttle, float steering, bool extend, bool retract);
         void publish();
+        inline int32_t bound_val(int32_t in, int32_t max, int32_t min) { return std::max(min, std::min(in, max)); }
 
     };
 } // namespace mav2robo
