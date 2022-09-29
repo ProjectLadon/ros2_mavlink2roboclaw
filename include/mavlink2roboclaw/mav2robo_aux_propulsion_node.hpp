@@ -158,6 +158,7 @@ namespace mav2robo
         void fetch_params();
         void mix_motors(float throttle, float steering, bool extend, bool retract);
         void publish();
+        void check_current(float limit);
         inline int32_t bound_val(int32_t in, int32_t max, int32_t min) { return std::max(min, std::min(in, max)); }
 
     };

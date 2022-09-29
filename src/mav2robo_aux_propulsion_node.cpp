@@ -235,6 +235,7 @@ namespace mav2robo
         mHornState = false;
         this->mix_motors(0.0, 0.0, true, false);
         this->publish();
+        this->check_current(mExtendThreshAmps);
         if (((steady_clock::now() - mStateStartTime) > mExtendTimeMillis)
             or (mRetractLeftComplete and mRetractRightComplete))
         {
@@ -320,6 +321,7 @@ namespace mav2robo
         mHornState = false;
         this->mix_motors(0.0, 0.0, false, true);
         this->publish();
+        this->check_current(mRetractThreshAmps);
         if (((steady_clock::now() - mStateStartTime) > mHornRetractTimeMillis)
             or (mRetractLeftComplete and mRetractRightComplete))
         {
@@ -466,6 +468,12 @@ namespace mav2robo
             mLeftRetractOutput = mRetractNeutralOut;
             mRightRetractOutput = mRetractNeutralOut;
         }
+    }
+
+    void Mav2RoboAuxProp::check_current(float limit)
+    {
+        if (mRetractLeftAmps > limit) { mRetractLeftComplete = true; }
+        if (mRetractRightAmps > limit) { mRetractRightComplete = true; }
     }
 
     void Mav2RoboAuxProp::publish()

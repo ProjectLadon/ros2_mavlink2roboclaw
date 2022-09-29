@@ -11,6 +11,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 #include "ssp_interfaces/srv/relay_command.hpp"
+#include "ssp_interfaces/msg/digital_input.hpp"
 #include "mavros_msgs/msg/state.hpp"
 
 using namespace std::chrono_literals;
@@ -18,12 +19,10 @@ using namespace std;
 
 namespace mav2robo
 {
-
-
-    class Mav2RoboStateSwitch : public rclcpp::Node
+class Mav2RoboSafetySwitch : public rclcpp::Node
     {
     public:
-        Mav2RoboStateSwitch(string name);
+        Mav2RoboSafetySwitch(string name);
         // service client
         rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedPtr mRelayClient;
     
@@ -34,6 +33,7 @@ namespace mav2robo
 
     private:
         // parameter variables
+        bool            mTriggerState;
         bool            mConnectedEnabled;
         bool            mArmedEnabled;
         bool            mGuidedEnabled;
@@ -50,7 +50,8 @@ namespace mav2robo
         bool            mSysStatusInverted;
         vector<uint8_t> mSysStatusTriggerValues;
         uint8_t         mOutputChannel;
-        bool            mOutputInvert;
+        bool            mTriggeredOutput;
+        bool            mTriggerActiveState;
 
         // param handlers
         void declare_params();
@@ -60,17 +61,23 @@ namespace mav2robo
         bool check_string_mode_triggered(string input);
         bool check_sys_state_triggered(uint8_t input);
 
-        // subscriber
-        rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr mStateSub;
+        // subscribers
+        rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr            mStateSub;
+        rclcpp::Subscription<ssp_interfaces::msg::DigitalInput>::SharedPtr  mTriggerSub;
 
-        // subscriber callback
-        void act_cb(const mavros_msgs::msg::State &msg);
+        // timer
+        rclcpp::TimerBase::SharedPtr mResponseTimer;
+
+        // callbacks
+        void state_cb(const mavros_msgs::msg::State &msg);
+        void trigger_cb(const ssp_interfaces::msg::DigitalInput &msg);
+        void timer_cb();
 
         // state variables
         bool    mModeTriggered;
         bool    mSysStatusTriggered;
         bool    mNewCommandAvailable;
         bool    mOutputState;
-
+        bool    mIsLatched;
     };
 } // namespace mav2robo

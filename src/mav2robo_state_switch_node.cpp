@@ -12,20 +12,20 @@ using std::placeholders::_1;
 
 namespace mav2robo
 {
-    Mav2RoboSwitch::Mav2RoboSwitch(string name) : Node (name)
+    Mav2RoboStateSwitch::Mav2RoboStateSwitch(string name) : Node (name)
     {
         declare_params();
         fetch_params();
 
         // create subscriber
         mStateSub = this->create_subscription<mavros_msgs::msg::State>(
-            "~/state", 10, bind(&Mav2RoboSwitch::act_cb, this, _1));
+            "~/state", 10, bind(&Mav2RoboStateSwitch::act_cb, this, _1));
 
         // create client
         mRelayClient = this->create_client<ssp_interfaces::srv::RelayCommand>("~/relay_client");
     }
 
-    void Mav2RoboSwitch::declare_params()
+    void Mav2RoboStateSwitch::declare_params()
     {
         this->declare_parameter<bool>("connect.enabled", false);
         this->declare_parameter<bool>("armed.enabled", false);
@@ -46,7 +46,7 @@ namespace mav2robo
         this->declare_parameter<bool>("output.invert", false);
     }
 
-    void Mav2RoboSwitch::fetch_params()
+    void Mav2RoboStateSwitch::fetch_params()
     {
         this->get_parameter("connect.enabled", mConnectedEnabled);
         this->get_parameter("armed.enabled", mArmedEnabled);
@@ -68,7 +68,7 @@ namespace mav2robo
         if ((mOutputChannel > 8) or (mOutputChannel < 1)) { throw std::runtime_error("Output channel must be between 1 and 8, inclusive"); }
     }
 
-    void Mav2RoboSwitch::act_cb(const mavros_msgs::msg::State &msg)
+    void Mav2RoboStateSwitch::act_cb(const mavros_msgs::msg::State &msg)
     {
         bitset<6> output_states;
         bool output = false;
@@ -91,13 +91,13 @@ namespace mav2robo
         
     }
 
-    bool Mav2RoboSwitch::check_string_mode_triggered(string input)
+    bool Mav2RoboStateSwitch::check_string_mode_triggered(string input)
     {
         for (auto &a : mTriggerModes) { if(a == input) { return true; } }
         return false;
     }
 
-    bool Mav2RoboSwitch::check_sys_state_triggered(uint8_t input)
+    bool Mav2RoboStateSwitch::check_sys_state_triggered(uint8_t input)
     {
         for (auto &a : mSysStatusTriggerValues) { if(a == input) { return true; } }
         return false;
@@ -108,7 +108,7 @@ namespace mav2robo
 int main(int argc, char **argv) 
 {
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<mav2robo::Mav2RoboSwitch>("mav2roboclaw_state_switch");
+    auto node = std::make_shared<mav2robo::Mav2RoboStateSwitch>("mav2roboclaw_state_switch");
     while (rclcpp::ok())
     {
         rclcpp::spin_some(node);
