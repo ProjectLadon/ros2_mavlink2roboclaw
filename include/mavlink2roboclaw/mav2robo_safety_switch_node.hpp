@@ -79,5 +79,6 @@ class Mav2RoboSafetySwitch : public rclcpp::Node
         bool    mNewCommandAvailable;
         bool    mOutputState;
         bool    mIsLatched;
+        bool    mResetEnable;
     };
 } // namespace mav2robo

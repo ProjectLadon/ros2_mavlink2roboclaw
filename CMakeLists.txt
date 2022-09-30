@@ -61,9 +61,9 @@ ament_target_dependencies(mav2robo_aux_propulsion_node
     "rcl_interfaces"
     "ssp_interfaces")
 
-add_executable(mav2robo_safety_switch
+add_executable(mav2robo_safety_switch_node
     src/mav2robo_safety_switch.cpp)
-ament_target_dependencies(mav2robo_safety_switch
+ament_target_dependencies(mav2robo_safety_switch_node
     "rclcpp"
     "roboclaw"
     "mavros_msgs"
@@ -76,7 +76,7 @@ install(TARGETS
     mav2robo_switch_node
     mav2robo_state_switch_node
     mav2robo_aux_propulsion_node
-    mav2robo_safety_switch
+    mav2robo_safety_switch_node
     DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)

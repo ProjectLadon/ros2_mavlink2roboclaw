@@ -29,6 +29,10 @@ namespace mav2robo
         // create timer
         mResponseTimer = this->create_wall_timer(100ms, 
             bind(&Mav2RoboSafetySwitch::timer_cb, this));
+
+        // state variable initialization
+        mResetEnable = false;
+        mIsLatched = false;
     }
 
     void Mav2RoboSafetySwitch::declare_params()
@@ -90,7 +94,8 @@ namespace mav2robo
         reset_states[5] = mManualInputEnabled ? (msg.manual_input xor mManualInputInverted) : mIsOutputAnd;
         if (mIsOutputAnd) { reset = reset_states.all(); }
         else { reset = reset_states.any(); }
-        if (reset and mIsLatched) { 
+        if (!reset) { mResetEnable = true; }
+        if (reset and mIsLatched and mResetEnable) { 
             RCLCPP_INFO(this->get_logger(), "Resetting safety switch");
             mNewCommandAvailable = true; 
             mIsLatched = false;
@@ -101,7 +106,10 @@ namespace mav2robo
 
     void Mav2RoboSafetySwitch::trigger_cb(const ssp_interfaces::msg::DigitalInput &msg)
     {
-        if (msg.state == mTriggerActiveState) { mIsLatched = true; }
+        if (msg.state == mTriggerActiveState) { 
+            mIsLatched = true; 
+            mResetEnable = false;
+        }
     }
     
     bool Mav2RoboSafetySwitch::check_string_mode_triggered(string input)
