@@ -48,10 +48,10 @@ namespace mav2robo
             bind(&Mav2RoboAuxProp::motor_current_cb, this, _1));
         
         // create publishers
-        mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/propulsion", sensor_qos);
-        mLeftMotorPub       = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/propulsion", sensor_qos);
-        mRightRetractPub    = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/retract", sensor_qos);    
-        mLeftRetractPub     = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/retract", sensor_qos);
+        mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/propulsion", 10);
+        mLeftMotorPub       = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/propulsion", 10);
+        mRightRetractPub    = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/retract", 10);    
+        mLeftRetractPub     = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/retract", 10);
 
         // create client
         mHornClient         = this->create_client<ssp_interfaces::srv::RelayCommand>("~/horn");
@@ -322,7 +322,7 @@ namespace mav2robo
         this->mix_motors(0.0, 0.0, false, true);
         this->publish();
         this->check_current(mRetractThreshAmps);
-        if (((steady_clock::now() - mStateStartTime) > mHornRetractTimeMillis)
+        if (((steady_clock::now() - mStateStartTime) > mRetractTimeMillis)
             or (mRetractLeftComplete and mRetractRightComplete))
         {
             return aux_propulsion_state_t::INACTIVE;
