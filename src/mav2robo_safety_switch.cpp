@@ -94,7 +94,10 @@ namespace mav2robo
         reset_states[5] = mManualInputEnabled ? (msg.manual_input xor mManualInputInverted) : mIsOutputAnd;
         if (mIsOutputAnd) { reset = reset_states.all(); }
         else { reset = reset_states.any(); }
-        if (!reset) { mResetEnable = true; }
+        if (!reset) { 
+            RCLCPP_INFO(this->get_logger(), "Safety switch reset enabled");
+            mResetEnable = true; 
+        }
         if (reset and mIsLatched and mResetEnable) { 
             RCLCPP_INFO(this->get_logger(), "Resetting safety switch");
             mNewCommandAvailable = true; 
@@ -107,6 +110,7 @@ namespace mav2robo
     void Mav2RoboSafetySwitch::trigger_cb(const ssp_interfaces::msg::DigitalInput &msg)
     {
         if (msg.state == mTriggerActiveState) { 
+            RCLCPP_INFO(this->get_logger(), "Safety switch triggered");
             mIsLatched = true; 
             mResetEnable = false;
         }
