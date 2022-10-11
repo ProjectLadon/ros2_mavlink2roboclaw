@@ -42,15 +42,17 @@ namespace mav2robo
         auto sensor_qos     = rclcpp::SensorDataQoS();
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
             "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_cb, this, _1));
+        mStateSub = this->create_subscription<mavros_msgs::msg::State>(
+            "~/state_in", sensor_qos, bind(&Mav2RoboSingle::state_cb, this, _1));
 
-        // create publisher
+        // create publishers
+        mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/duty_cmd", 10);
         switch(mCmdType)
         {
             case mav2robo::RoboclawCmdType::Velocity:
                 mVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingle>("~/vel_cmd", 10);
                 break;
             case mav2robo::RoboclawCmdType::Duty:
-                mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/duty_cmd", 10);
                 break;
             case mav2robo::RoboclawCmdType::Position:
             default:
@@ -62,6 +64,19 @@ namespace mav2robo
     void Mav2RoboSingle::act_cb(const mavros_msgs::msg::ActuatorControl &msg)
     {
         if (msg.group_mix == mInputMixGroup) { pub(msg.controls[mInputCtrlChannel]); }
+    }
+
+    void Mav2RoboSingle::state_cb(const mavros_msgs::msg::State &msg_in)
+    {
+        if (mIsArmed xor msg_in.armed)
+        {
+            auto msg_out = roboclaw::msg::MotorDutySingle();
+            msg_out.index = mOutputIndex;
+            msg_out.channel = mOutputChannel;
+            msg_out.mot_duty = 0;
+            mDutyPub->publish(msg_out);    
+            mIsArmed = msg_in.armed;          
+        }
     }
 
     void Mav2RoboSingle::pub(float val)

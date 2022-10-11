@@ -14,6 +14,7 @@
 #include "roboclaw/msg/motor_position_single.hpp"
 #include "mavros_msgs/msg/actuator_control.hpp"
 #include "mavros_msgs/msg/actuator_output_status.hpp"
+#include "mavros_msgs/msg/state.hpp"
 
 using namespace std::chrono_literals;
 using namespace std;
@@ -34,8 +35,12 @@ namespace mav2robo
         int32_t             mGain;
         int32_t             mOffset;
 
+        // state variable
+        bool                mIsArmed;
+
         // subscriber
         rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr  mActSub;
+        rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr            mStateSub;
 
         // publishers
         rclcpp::Publisher<roboclaw::msg::MotorPositionSingle>::SharedPtr    mPosnPub;
@@ -44,6 +49,7 @@ namespace mav2robo
 
         // callback
         void act_cb(const mavros_msgs::msg::ActuatorControl &msg);
+        void state_cb(const mavros_msgs::msg::State &msg_in);
 
         // publisher selector
         void pub(float val);
