@@ -9,9 +9,9 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "roboclaw/msg/motor_velocity_single.hpp"
-#include "roboclaw/msg/motor_duty_single.hpp"
-#include "roboclaw/msg/motor_position_single.hpp"
+#include "roboclaw/msg/motor_velocity_single_stamped.hpp"
+#include "roboclaw/msg/motor_duty_single_stamped.hpp"
+#include "roboclaw/msg/motor_position_single_stamped.hpp"
 #include "mavros_msgs/msg/actuator_control.hpp"
 #include "mavros_msgs/msg/actuator_output_status.hpp"
 #include "mavros_msgs/msg/state.hpp"
@@ -43,9 +43,9 @@ namespace mav2robo
         rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr            mStateSub;
 
         // publishers
-        rclcpp::Publisher<roboclaw::msg::MotorPositionSingle>::SharedPtr    mPosnPub;
-        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingle>::SharedPtr    mVelPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mDutyPub;
+        rclcpp::Publisher<roboclaw::msg::MotorPositionSingleStamped>::SharedPtr    mPosnPub;
+        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingleStamped>::SharedPtr    mVelPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mDutyPub;
 
         // callback
         void act_cb(const mavros_msgs::msg::ActuatorControl &msg);

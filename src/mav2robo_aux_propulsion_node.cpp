@@ -43,15 +43,15 @@ namespace mav2robo
         mActOutStatSub      = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
             "~/actuator_output_status", sensor_qos, 
             bind(&Mav2RoboAuxProp::act_out_stat_cb, this, _1));
-        mMotorCurrentSub    = this->create_subscription<roboclaw::msg::MotorVoltsAmps>(
+        mMotorCurrentSub    = this->create_subscription<roboclaw::msg::MotorVoltsAmpsStamped>(
             "~/retract_current", sensor_qos, 
             bind(&Mav2RoboAuxProp::motor_current_cb, this, _1));
         
         // create publishers
-        mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/propulsion", 10);
-        mLeftMotorPub       = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/propulsion", 10);
-        mRightRetractPub    = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/retract", 10);    
-        mLeftRetractPub     = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/retract", 10);
+        mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/right/propulsion", 10);
+        mLeftMotorPub       = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/left/propulsion", 10);
+        mRightRetractPub    = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/right/retract", 10);    
+        mLeftRetractPub     = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/left/retract", 10);
 
         // create client
         mHornClient         = this->create_client<ssp_interfaces::srv::RelayCommand>("~/horn");
@@ -128,7 +128,7 @@ namespace mav2robo
         }
     }
 
-    void Mav2RoboAuxProp::motor_current_cb(const roboclaw::msg::MotorVoltsAmps &msg)
+    void Mav2RoboAuxProp::motor_current_cb(const roboclaw::msg::MotorVoltsAmpsStamped &msg)
     {
         if (mLeftRetractIndex == msg.index)
         {
@@ -478,22 +478,26 @@ namespace mav2robo
 
     void Mav2RoboAuxProp::publish()
     {
-        auto left_mot_msg           = roboclaw::msg::MotorDutySingle();
-        auto right_mot_msg          = roboclaw::msg::MotorDutySingle();
-        auto left_retract_msg       = roboclaw::msg::MotorDutySingle();
-        auto right_retract_msg      = roboclaw::msg::MotorDutySingle();
-        left_mot_msg.index          = mLeftMotorIndex;
-        left_mot_msg.channel        = mLeftMotorChannel;
-        left_mot_msg.mot_duty       = mLeftMotorOutput;
-        right_mot_msg.index         = mRightMotorIndex;
-        right_mot_msg.channel       = mRightMotorChannel;
-        right_mot_msg.mot_duty      = mRightMotorOutput;
-        left_retract_msg.index      = mLeftRetractIndex;
-        left_retract_msg.channel    = mLeftRetractChannel;
-        left_retract_msg.mot_duty   = mLeftRetractOutput;
-        right_retract_msg.index     = mRightRetractIndex;
-        right_retract_msg.channel   = mRightRetractChannel;
-        right_retract_msg.mot_duty  = mRightRetractOutput;
+        auto left_mot_msg               = roboclaw::msg::MotorDutySingleStamped();
+        auto right_mot_msg              = roboclaw::msg::MotorDutySingleStamped();
+        auto left_retract_msg           = roboclaw::msg::MotorDutySingleStamped();
+        auto right_retract_msg          = roboclaw::msg::MotorDutySingleStamped();
+        left_mot_msg.header.stamp       = this->get_clock()->now();
+        right_mot_msg.header.stamp      = this->get_clock()->now();
+        left_retract_msg.header.stamp   = this->get_clock()->now();
+        right_retract_msg.header.stamp  = this->get_clock()->now();
+        left_mot_msg.index              = mLeftMotorIndex;
+        left_mot_msg.channel            = mLeftMotorChannel;
+        left_mot_msg.mot_duty           = mLeftMotorOutput;
+        right_mot_msg.index             = mRightMotorIndex;
+        right_mot_msg.channel           = mRightMotorChannel;
+        right_mot_msg.mot_duty          = mRightMotorOutput;
+        left_retract_msg.index          = mLeftRetractIndex;
+        left_retract_msg.channel        = mLeftRetractChannel;
+        left_retract_msg.mot_duty       = mLeftRetractOutput;
+        right_retract_msg.index         = mRightRetractIndex;
+        right_retract_msg.channel       = mRightRetractChannel;
+        right_retract_msg.mot_duty      = mRightRetractOutput;
         mLeftMotorPub->publish(left_mot_msg);
         mRightMotorPub->publish(right_mot_msg);
         mLeftRetractPub->publish(left_retract_msg);

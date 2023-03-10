@@ -65,16 +65,16 @@ namespace mav2robo
         switch(mCmdType)
         {
             case mav2robo::RoboclawCmdType::Velocity:
-                mLeftVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingle>("~/left/vel_cmd", 10);
-                mRightVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingle>("~/right/vel_cmd", 10);
+                mLeftVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingleStamped>("~/left/vel_cmd", 10);
+                mRightVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingleStamped>("~/right/vel_cmd", 10);
                 break;
             case mav2robo::RoboclawCmdType::Duty:
-                mLeftDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/duty_cmd", 10);
-                mRightDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/duty_cmd", 10);
+                mLeftDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/left/duty_cmd", 10);
+                mRightDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/right/duty_cmd", 10);
                 break;
             default:
-                mLeftDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/left/duty_cmd", 10);
-                mRightDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/right/duty_cmd", 10);
+                mLeftDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/left/duty_cmd", 10);
+                mRightDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/right/duty_cmd", 10);
                 break;
         }
     }
@@ -100,8 +100,10 @@ namespace mav2robo
         {
             case mav2robo::RoboclawCmdType::Velocity:
             {
-                auto msg_left = roboclaw::msg::MotorVelocitySingle();
-                auto msg_right = roboclaw::msg::MotorVelocitySingle();
+                auto msg_left = roboclaw::msg::MotorVelocitySingleStamped();
+                auto msg_right = roboclaw::msg::MotorVelocitySingleStamped();
+                msg_left.header.stamp = this->get_clock()->now();
+                msg_right.header.stamp = this->get_clock()->now();
                 msg_left.index = mLeftOutputIndex;
                 msg_left.channel = mLeftOutputChannel;
                 msg_left.mot_vel_sps = left_out;
@@ -115,8 +117,10 @@ namespace mav2robo
             case mav2robo::RoboclawCmdType::Duty:
             default:
             {
-                auto msg_left = roboclaw::msg::MotorDutySingle();
-                auto msg_right = roboclaw::msg::MotorDutySingle();
+                auto msg_left = roboclaw::msg::MotorDutySingleStamped();
+                auto msg_right = roboclaw::msg::MotorDutySingleStamped();
+                msg_left.header.stamp = this->get_clock()->now();
+                msg_right.header.stamp = this->get_clock()->now();
                 msg_left.index = mLeftOutputIndex;
                 msg_left.channel = mLeftOutputChannel;
                 msg_left.mot_duty = left_out;

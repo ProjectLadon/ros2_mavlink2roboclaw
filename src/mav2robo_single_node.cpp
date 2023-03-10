@@ -46,17 +46,17 @@ namespace mav2robo
             "~/state_in", sensor_qos, bind(&Mav2RoboSingle::state_cb, this, _1));
 
         // create publishers
-        mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingle>("~/duty_cmd", 10);
+        mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/duty_cmd", 10);
         switch(mCmdType)
         {
             case mav2robo::RoboclawCmdType::Velocity:
-                mVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingle>("~/vel_cmd", 10);
+                mVelPub = this->create_publisher<roboclaw::msg::MotorVelocitySingleStamped>("~/vel_cmd", 10);
                 break;
             case mav2robo::RoboclawCmdType::Duty:
                 break;
             case mav2robo::RoboclawCmdType::Position:
             default:
-                mPosnPub = this->create_publisher<roboclaw::msg::MotorPositionSingle>("~/posn_cmd", 10);
+                mPosnPub = this->create_publisher<roboclaw::msg::MotorPositionSingleStamped>("~/posn_cmd", 10);
                 break;
         }
     }
@@ -70,7 +70,8 @@ namespace mav2robo
     {
         if (mIsArmed xor msg_in.armed)
         {
-            auto msg_out = roboclaw::msg::MotorDutySingle();
+            auto msg_out = roboclaw::msg::MotorDutySingleStamped();
+            msg_out.header.stamp = this->get_clock()->now();
             msg_out.index = mOutputIndex;
             msg_out.channel = mOutputChannel;
             msg_out.mot_duty = 0;
@@ -86,7 +87,8 @@ namespace mav2robo
         {
             case mav2robo::RoboclawCmdType::Velocity:
             {
-                auto msg = roboclaw::msg::MotorVelocitySingle();
+                auto msg = roboclaw::msg::MotorVelocitySingleStamped();
+                msg.header.stamp = this->get_clock()->now();
                 msg.index = mOutputIndex;
                 msg.channel = mOutputChannel;
                 msg.mot_vel_sps = out;
@@ -95,7 +97,8 @@ namespace mav2robo
             }
             case mav2robo::RoboclawCmdType::Duty:
             {
-                auto msg = roboclaw::msg::MotorDutySingle();
+                auto msg = roboclaw::msg::MotorDutySingleStamped();
+                msg.header.stamp = this->get_clock()->now();
                 msg.index = mOutputIndex;
                 msg.channel = mOutputChannel;
                 msg.mot_duty = out;
@@ -105,7 +108,8 @@ namespace mav2robo
             case mav2robo::RoboclawCmdType::Position:
             default:
             {
-                auto msg = roboclaw::msg::MotorPositionSingle();
+                auto msg = roboclaw::msg::MotorPositionSingleStamped();
+                msg.header.stamp = this->get_clock()->now();
                 msg.index = mOutputIndex;
                 msg.channel = mOutputChannel;
                 msg.mot_pos_steps = out;

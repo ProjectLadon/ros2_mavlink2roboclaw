@@ -13,8 +13,8 @@
 
 #include "rclcpp/rclcpp.hpp"
 
-#include "roboclaw/msg/motor_volts_amps.hpp"
-#include "roboclaw/msg/motor_duty_single.hpp"
+#include "roboclaw/msg/motor_volts_amps_stamped.hpp"
+#include "roboclaw/msg/motor_duty_single_stamped.hpp"
 #include "ssp_interfaces/srv/relay_command.hpp"
 #include "mavros_msgs/msg/actuator_control.hpp"
 #include "mavros_msgs/msg/actuator_output_status.hpp"
@@ -126,13 +126,13 @@ namespace mav2robo
         // subscriptions
         rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr      mActCtrlSub;
         rclcpp::Subscription<mavros_msgs::msg::ActuatorOutputStatus>::SharedPtr mActOutStatSub;
-        rclcpp::Subscription<roboclaw::msg::MotorVoltsAmps>::SharedPtr          mMotorCurrentSub;
+        rclcpp::Subscription<roboclaw::msg::MotorVoltsAmpsStamped>::SharedPtr          mMotorCurrentSub;
 
         // publications
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mRightMotorPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mLeftMotorPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mRightRetractPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingle>::SharedPtr        mLeftRetractPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mRightMotorPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mLeftMotorPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mRightRetractPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mLeftRetractPub;
 
         // timers
         rclcpp::TimerBase::SharedPtr mStateTimer;
@@ -140,7 +140,7 @@ namespace mav2robo
         // callbacks
         void act_ctrl_cb(const mavros_msgs::msg::ActuatorControl &msg);
         void act_out_stat_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg);
-        void motor_current_cb(const roboclaw::msg::MotorVoltsAmps &msg);
+        void motor_current_cb(const roboclaw::msg::MotorVoltsAmpsStamped &msg);
         void state_timer_cb();
 
         // state functions
