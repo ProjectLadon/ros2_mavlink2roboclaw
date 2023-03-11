@@ -198,7 +198,7 @@ namespace mav2robo
             mHornFlag = true;
         }
         mHornState = false;
-        this->mix_motors(0.0, 0.0, false, false);
+        this->mix_motors(0.0, 0.0, false, false, false, true);
         this->publish();
         if (mExtendCmdFlag) { return aux_propulsion_state_t::EXTEND_START; }
         return aux_propulsion_state_t::INACTIVE;
@@ -256,7 +256,7 @@ namespace mav2robo
             mHornFlag = true;
         }
         mHornState = true;
-        this->mix_motors(0.0, 0.0, false, false);
+        this->mix_motors(0.0, 0.0, false, false, true, false);
         this->publish();
         if ((steady_clock::now() - mStateStartTime) > mHornMotorStartTimeMillis)
         {
@@ -277,7 +277,7 @@ namespace mav2robo
             mHornFlag = true;
         }
         mHornState = false;
-        this->mix_motors(mThrottleCmd, mSteeringCmd, false, false);
+        this->mix_motors(mThrottleCmd, mSteeringCmd, false, false, true, false);
         this->publish();
         if (!mExtendCmdFlag)
         {
@@ -376,6 +376,8 @@ namespace mav2robo
         this->declare_parameter<int32_t>("retract.out.extend", 0);
         this->declare_parameter<int32_t>("retract.out.retract", 0);
         this->declare_parameter<int32_t>("retract.out.neutral", 0);
+        this->declare_parameter<int32_t>("retract.out.retract_hold", 0);
+        this->declare_parameter<int32_t>("retract.out.extend_hold", 0);
         this->declare_parameter<uint8_t>("horn.channel", 0);
 
         // state transition parameters
@@ -425,6 +427,8 @@ namespace mav2robo
         this->get_parameter("retract.out.extend",               mRetractExtendOut);
         this->get_parameter("retract.out.retract",              mRetractRetractOut);
         this->get_parameter("retract.out.neutral",              mRetractNeutralOut);
+        this->get_parameter("retract.out.retract_hold",         mRetractHold);
+        this->get_parameter("retract.out.extend_hold",          mExtendHold);
         this->get_parameter("horn.channel",                     mHornChannel);
 
         // state transition parameter variables
@@ -448,20 +452,30 @@ namespace mav2robo
         mStepTimeMillis             = (long int)(tmp_sec * 1000) * 1ms;
     }
 
-    void Mav2RoboAuxProp::mix_motors(float throttle, float steering, bool extend, bool retract)
+    void Mav2RoboAuxProp::mix_motors(float throttle, float steering, bool extend, bool retract, bool extend_hold, bool retract_hold)
     {
         mLeftMotorOutput = bound_val((mLeftMotorGain * (throttle + steering + mLeftMotorOffset)), mMaxMotorOutput, mMinMotorOutput);
         mRightMotorOutput = bound_val((mRightMotorGain * (throttle - steering + mRightMotorOffset)), mMaxMotorOutput, mMinMotorOutput);
-        if (extend)
+        if (extend and !extend_hold)
         {
             RCLCPP_INFO(this->get_logger(), "Extending aux propulsion, output %d, completed left %d right %d", mRetractExtendOut, (int)mRetractLeftComplete, (int)mRetractRightComplete);
-            mRetractLeftComplete ? mLeftRetractOutput = mRetractNeutralOut : mLeftRetractOutput = mRetractExtendOut;
-            mRetractRightComplete ? mRightRetractOutput = mRetractNeutralOut : mRightRetractOutput = mRetractExtendOut;
+            mRetractLeftComplete ? mLeftRetractOutput = mExtendHold : mLeftRetractOutput = mRetractExtendOut;
+            mRetractRightComplete ? mRightRetractOutput = mExtendHold : mRightRetractOutput = mRetractExtendOut;
         }
-        else if (retract)
+        else if (retract and !retract_hold)
         {
-            mRetractLeftComplete ? mLeftRetractOutput = mRetractNeutralOut : mLeftRetractOutput = mRetractRetractOut;
-            mRetractRightComplete ? mRightRetractOutput = mRetractNeutralOut : mRightRetractOutput = mRetractRetractOut;
+            mRetractLeftComplete ? mLeftRetractOutput = mRetractHold : mLeftRetractOutput = mRetractRetractOut;
+            mRetractRightComplete ? mRightRetractOutput = mRetractHold : mRightRetractOutput = mRetractRetractOut;
+        }
+        else if (extend_hold)
+        {
+            mLeftRetractOutput  = mExtendHold;
+            mRightRetractOutput = mExtendHold;
+        }
+        else if (retract_hold)
+        {
+            mLeftRetractOutput  = mRetractHold;
+            mRightRetractOutput = mRetractHold;
         }
         else 
         {

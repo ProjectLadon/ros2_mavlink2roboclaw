@@ -76,25 +76,27 @@ namespace mav2robo
 
 
         // extend/retract output parameter variables
-        uint8_t                     mLeftRetractIndex;
-        uint8_t                     mLeftRetractChannel;
-        uint8_t                     mRightRetractIndex;
-        uint8_t                     mRightRetractChannel;
-        int32_t                     mRetractExtendOut;
-        int32_t                     mRetractRetractOut;
-        int32_t                     mRetractNeutralOut;
-        uint8_t                     mHornChannel;
+        uint8_t     mLeftRetractIndex;
+        uint8_t     mLeftRetractChannel;
+        uint8_t     mRightRetractIndex;
+        uint8_t     mRightRetractChannel;
+        int32_t     mRetractExtendOut;
+        int32_t     mRetractRetractOut;
+        int32_t     mRetractNeutralOut;
+        int32_t     mRetractHold;
+        int32_t     mExtendHold;
+        uint8_t     mHornChannel;
 
         // state transition parameter variables
-        milliseconds                mHornRetractTimeMillis;
-        milliseconds                mHornExtendTimeMillis;
-        milliseconds                mHornMotorStartTimeMillis;
-        milliseconds                mRetractTimeMillis;
-        milliseconds                mExtendTimeMillis;
-        float                       mRetractThreshAmps;
-        float                       mExtendThreshAmps;
-        float                       mRetractShutdownThreshAmps;
-        milliseconds                mStepTimeMillis;
+        milliseconds    mHornRetractTimeMillis;
+        milliseconds    mHornExtendTimeMillis;
+        milliseconds    mHornMotorStartTimeMillis;
+        milliseconds    mRetractTimeMillis;
+        milliseconds    mExtendTimeMillis;
+        float           mRetractThreshAmps;
+        float           mExtendThreshAmps;
+        float           mRetractShutdownThreshAmps;
+        milliseconds    mStepTimeMillis;
 
         // state variables
         aux_propulsion_state_t      mCurrState;
@@ -111,10 +113,10 @@ namespace mav2robo
         bool                        mRetractRightComplete;
 
         // output variables
-        int32_t                     mLeftMotorOutput;
-        int32_t                     mRightMotorOutput;
-        int32_t                     mLeftRetractOutput;
-        int32_t                     mRightRetractOutput;
+        int32_t     mLeftMotorOutput;
+        int32_t     mRightMotorOutput;
+        int32_t     mLeftRetractOutput;
+        int32_t     mRightRetractOutput;
 
         // service client
         rclcpp::Client<ssp_interfaces::srv::RelayCommand>::SharedPtr mHornClient;
@@ -156,7 +158,7 @@ namespace mav2robo
         // internal methods
         void declare_params();
         void fetch_params();
-        void mix_motors(float throttle, float steering, bool extend, bool retract);
+        void mix_motors(float throttle, float steering, bool extend, bool retract, bool extend_hold = false, bool retract_hold = false);
         void publish();
         void check_current(float limit);
         inline int32_t bound_val(int32_t in, int32_t max, int32_t min) { return std::max(min, std::min(in, max)); }
