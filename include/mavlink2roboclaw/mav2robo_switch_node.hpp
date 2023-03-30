@@ -32,17 +32,19 @@ namespace mav2robo
 
     private:
         // parameter variables
-        uint8_t             mInputMixGroup;
+        uint8_t             mInputMixGroup;      // if this is less than 0, then use ActuatorOutputStatus inputs
         uint8_t             mInputCtrlChannel;
         float               mThreshold;
         uint8_t             mOutputChannel;
         bool                mOutputInvert;
 
         // subscriber
-        rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr   mActSub;
+        rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr      mActSub;
+        rclcpp::Subscription<mavros_msgs::msg::ActuatorOutputStatus>::SharedPtr mActOutStatSub;
 
         // subscriber callback
         void act_cb(const mavros_msgs::msg::ActuatorControl &msg);
+        void act_out_stat_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg);
 
         // state variables
         float               mInputValue;

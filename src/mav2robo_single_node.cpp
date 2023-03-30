@@ -42,6 +42,8 @@ namespace mav2robo
         auto sensor_qos     = rclcpp::SensorDataQoS();
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
             "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_cb, this, _1));
+        mActOutStatSub = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
+            "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_output_cb, this, _1));
         mStateSub = this->create_subscription<mavros_msgs::msg::State>(
             "~/state_in", sensor_qos, bind(&Mav2RoboSingle::state_cb, this, _1));
 
@@ -64,6 +66,11 @@ namespace mav2robo
     void Mav2RoboSingle::act_cb(const mavros_msgs::msg::ActuatorControl &msg)
     {
         if (msg.group_mix == mInputMixGroup) { pub(msg.controls[mInputCtrlChannel]); }
+    }
+
+    void Mav2RoboSingle::act_output_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg)
+    {
+        if (msg.group_mix < 0) { pub(msg.actuator[mInputCtrlChannel]); }
     }
 
     void Mav2RoboSingle::state_cb(const mavros_msgs::msg::State &msg_in)

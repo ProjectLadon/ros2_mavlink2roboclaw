@@ -28,7 +28,7 @@ namespace mav2robo
     private:
         // parameter variables
         RoboclawCmdType     mCmdType;
-        uint8_t             mInputMixGroup;
+        uint8_t             mInputMixGroup;      // if this is less than 0, then use ActuatorOutputStatus inputs
         uint8_t             mInputCtrlChannel;
         uint8_t             mOutputIndex;
         uint8_t             mOutputChannel;
@@ -39,16 +39,18 @@ namespace mav2robo
         bool                mIsArmed;
 
         // subscriber
-        rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr  mActSub;
-        rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr            mStateSub;
+        rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr      mActSub;
+        rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr                mStateSub;
+        rclcpp::Subscription<mavros_msgs::msg::ActuatorOutputStatus>::SharedPtr mActOutStatSub;
 
         // publishers
-        rclcpp::Publisher<roboclaw::msg::MotorPositionSingleStamped>::SharedPtr    mPosnPub;
-        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingleStamped>::SharedPtr    mVelPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mDutyPub;
+        rclcpp::Publisher<roboclaw::msg::MotorPositionSingleStamped>::SharedPtr mPosnPub;
+        rclcpp::Publisher<roboclaw::msg::MotorVelocitySingleStamped>::SharedPtr mVelPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr     mDutyPub;
 
         // callback
         void act_cb(const mavros_msgs::msg::ActuatorControl &msg);
+        void act_output_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg);
         void state_cb(const mavros_msgs::msg::State &msg_in);
 
         // publisher selector

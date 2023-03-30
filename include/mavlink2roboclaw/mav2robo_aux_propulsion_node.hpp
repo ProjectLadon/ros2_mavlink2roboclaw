@@ -128,13 +128,13 @@ namespace mav2robo
         // subscriptions
         rclcpp::Subscription<mavros_msgs::msg::ActuatorControl>::SharedPtr      mActCtrlSub;
         rclcpp::Subscription<mavros_msgs::msg::ActuatorOutputStatus>::SharedPtr mActOutStatSub;
-        rclcpp::Subscription<roboclaw::msg::MotorVoltsAmpsStamped>::SharedPtr          mMotorCurrentSub;
+        rclcpp::Subscription<roboclaw::msg::MotorVoltsAmpsStamped>::SharedPtr   mMotorCurrentSub;
 
         // publications
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mRightMotorPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mLeftMotorPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mRightRetractPub;
-        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr        mLeftRetractPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr     mRightMotorPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr     mLeftMotorPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr     mRightRetractPub;
+        rclcpp::Publisher<roboclaw::msg::MotorDutySingleStamped>::SharedPtr     mLeftRetractPub;
 
         // timers
         rclcpp::TimerBase::SharedPtr mStateTimer;

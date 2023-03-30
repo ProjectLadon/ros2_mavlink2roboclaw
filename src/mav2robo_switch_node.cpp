@@ -31,6 +31,8 @@ namespace mav2robo
         // create subscriber
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
             "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_cb, this, _1));
+        mActOutStatSub = this->create_subscription<mavros_msgs::msg::ActuatorActuatorOutputStatusControl>(
+            "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_out_stat_cb, this, _1));
 
         // create client
         mRelayClient = this->create_client<ssp_interfaces::srv::RelayCommand>("~/relay_client");
@@ -41,6 +43,15 @@ namespace mav2robo
         if (msg.group_mix == mInputMixGroup) 
         { 
             mInputValue = msg.controls[mInputCtrlChannel];
+            mNewCommand = true; 
+        }
+    }
+
+    void Mav2RoboSwitch::act_out_stat_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg)
+    {
+        if (msg.group_mix < 0) 
+        { 
+            mInputValue = msg.actuator[mInputCtrlChannel];
             mNewCommand = true; 
         }
     }
