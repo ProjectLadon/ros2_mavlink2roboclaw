@@ -32,7 +32,7 @@ namespace mav2robo
 
     private:
         // parameter variables
-        uint8_t             mInputMixGroup;      // if this is less than 0, then use ActuatorOutputStatus inputs
+        int8_t               mInputMixGroup;      // if this is less than 0, then use ActuatorOutputStatus inputs
         uint8_t             mInputCtrlChannel;
         float               mThreshold;
         uint8_t             mOutputChannel;

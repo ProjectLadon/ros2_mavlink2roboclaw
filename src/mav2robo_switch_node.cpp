@@ -6,8 +6,6 @@
 #include <functional>
 #include <memory>
 
-using std::placeholders::_1;
-
 namespace mav2robo
 {
     Mav2RoboSwitch::Mav2RoboSwitch(string name) : Node (name)
@@ -30,9 +28,9 @@ namespace mav2robo
 
         // create subscriber
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
-            "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_cb, this, _1));
-        mActOutStatSub = this->create_subscription<mavros_msgs::msg::ActuatorActuatorOutputStatusControl>(
-            "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_out_stat_cb, this, _1));
+            "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_cb, this, std::placeholders::_1));
+        mActOutStatSub = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
+            "~/act_cmd", 10, bind(&Mav2RoboSwitch::act_out_stat_cb, this, std::placeholders::_1));
 
         // create client
         mRelayClient = this->create_client<ssp_interfaces::srv::RelayCommand>("~/relay_client");
@@ -49,7 +47,7 @@ namespace mav2robo
 
     void Mav2RoboSwitch::act_out_stat_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg)
     {
-        if (msg.group_mix < 0) 
+        if (mInputMixGroup < 0) 
         { 
             mInputValue = msg.actuator[mInputCtrlChannel];
             mNewCommand = true; 

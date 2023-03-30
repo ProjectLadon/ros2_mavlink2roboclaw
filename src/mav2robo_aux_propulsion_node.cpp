@@ -11,7 +11,6 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace std;
-using std::placeholders::_1;
 
 namespace mav2robo
 {
@@ -39,13 +38,13 @@ namespace mav2robo
         auto sensor_qos     = rclcpp::SensorDataQoS();
         mActCtrlSub         = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
             "~/actuator_control", sensor_qos, 
-            bind(&Mav2RoboAuxProp::act_ctrl_cb, this, _1));
+            bind(&Mav2RoboAuxProp::act_ctrl_cb, this, std::placeholders::_1));
         mActOutStatSub      = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
             "~/actuator_output_status", sensor_qos, 
-            bind(&Mav2RoboAuxProp::act_out_stat_cb, this, _1));
+            bind(&Mav2RoboAuxProp::act_out_stat_cb, this, std::placeholders::_1));
         mMotorCurrentSub    = this->create_subscription<roboclaw::msg::MotorVoltsAmpsStamped>(
             "~/retract_current", sensor_qos, 
-            bind(&Mav2RoboAuxProp::motor_current_cb, this, _1));
+            bind(&Mav2RoboAuxProp::motor_current_cb, this, std::placeholders::_1));
         
         // create publishers
         mRightMotorPub      = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/right/propulsion", 10);

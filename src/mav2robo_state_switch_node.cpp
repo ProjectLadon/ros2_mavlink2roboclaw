@@ -8,8 +8,6 @@
 #include <bitset>
 #include <thread>
 
-using std::placeholders::_1;
-
 namespace mav2robo
 {
     Mav2RoboStateSwitch::Mav2RoboStateSwitch(string name) : Node (name)
@@ -19,7 +17,7 @@ namespace mav2robo
 
         // create subscriber
         mStateSub = this->create_subscription<mavros_msgs::msg::State>(
-            "~/state", 10, bind(&Mav2RoboStateSwitch::act_cb, this, _1));
+            "~/state", 10, bind(&Mav2RoboStateSwitch::act_cb, this, std::placeholders::_1));
 
         // create client
         mRelayClient = this->create_client<ssp_interfaces::srv::RelayCommand>("~/relay_client");

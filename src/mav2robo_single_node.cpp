@@ -6,15 +6,13 @@
 #include <functional>
 #include <memory>
 
-using std::placeholders::_1;
-
 namespace mav2robo
 {
     Mav2RoboSingle::Mav2RoboSingle(string name) : Node (name)
     {
         // declare params
         this->declare_parameter<std::string>("command_type", "position");
-        this->declare_parameter<uint8_t>("input_mix_group", 0);
+        this->declare_parameter<int8_t>("input_mix_group", 0);
         this->declare_parameter<uint8_t>("input_ctrl_chan", 0);
         this->declare_parameter<uint8_t>("output_index", 0);
         this->declare_parameter<uint8_t>("output_channel", 1);
@@ -41,11 +39,11 @@ namespace mav2robo
         // create subscriber
         auto sensor_qos     = rclcpp::SensorDataQoS();
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
-            "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_cb, this, _1));
+            "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_cb, this, std::placeholders::_1));
         mActOutStatSub = this->create_subscription<mavros_msgs::msg::ActuatorOutputStatus>(
-            "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_output_cb, this, _1));
+            "~/act_cmd", sensor_qos, bind(&Mav2RoboSingle::act_output_cb, this, std::placeholders::_1));
         mStateSub = this->create_subscription<mavros_msgs::msg::State>(
-            "~/state_in", sensor_qos, bind(&Mav2RoboSingle::state_cb, this, _1));
+            "~/state_in", sensor_qos, bind(&Mav2RoboSingle::state_cb, this, std::placeholders::_1));
 
         // create publishers
         mDutyPub = this->create_publisher<roboclaw::msg::MotorDutySingleStamped>("~/duty_cmd", 10);
@@ -70,7 +68,7 @@ namespace mav2robo
 
     void Mav2RoboSingle::act_output_cb(const mavros_msgs::msg::ActuatorOutputStatus &msg)
     {
-        if (msg.group_mix < 0) { pub(msg.actuator[mInputCtrlChannel]); }
+        if (mInputMixGroup < 0) { pub(msg.actuator[mInputCtrlChannel]); }
     }
 
     void Mav2RoboSingle::state_cb(const mavros_msgs::msg::State &msg_in)

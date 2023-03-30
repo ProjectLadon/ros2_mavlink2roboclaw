@@ -6,8 +6,6 @@
 #include <functional>
 #include <memory>
 
-using std::placeholders::_1;
-
 namespace mav2robo
 {
 
@@ -59,7 +57,7 @@ namespace mav2robo
 
         // create subscriber
         mActSub = this->create_subscription<mavros_msgs::msg::ActuatorControl>(
-            "~/act_cmd", 10, bind(&Mav2RoboDiff::act_cb, this, _1));
+            "~/act_cmd", 10, bind(&Mav2RoboDiff::act_cb, this, std::placeholders::_1));
 
         // create publisher
         switch(mCmdType)
