@@ -11,7 +11,7 @@ namespace mav2robo
     Mav2RoboSwitch::Mav2RoboSwitch(string name) : Node (name)
     {
         // declare params
-        this->declare_parameter<uint8_t>("input_mix_group", 0);
+        this->declare_parameter<int8_t>("input_mix_group", 0);
         this->declare_parameter<uint8_t>("input_ctrl_chan", 0);
         this->declare_parameter<uint8_t>("output_channel", 1);
         this->declare_parameter<uint8_t>("switch_threshold", 0.0);
